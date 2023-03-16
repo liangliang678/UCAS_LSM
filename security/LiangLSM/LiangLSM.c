@@ -87,7 +87,7 @@ int is_enable(void){
 	}
 
 	int state;
-	kernel_read(fout,(char*)state, sizeof(int), &fout->f_pos);
+	kernel_read(fout,(char*)&state, sizeof(int), &fout->f_pos);
 	filp_close(fout, NULL);
 
 	return state;
