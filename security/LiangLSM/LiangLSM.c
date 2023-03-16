@@ -61,13 +61,13 @@ int role_permission(const char *role, const int op){
 			continue;
 
 		kernel_read(fout,(char*)_permission, sizeof(int) * PERMISSION_COUNT, &fout->f_pos);	
-		if(permission[_op]){
-			printk("LiangLSM: role: %s has permission %s\n", role, permission_list[_op]);
+		if(permission[op]){
+			printk("LiangLSM: role: %s has permission %s\n", role, permission_list[op]);
 			res = 1;
 			break;
 		}
 		else{
-			printk("LiangLSM: role: %s has no permission %s\n", role, permission_list[_op]);
+			printk("LiangLSM: role: %s has no permission %s\n", role, permission_list[op]);
 			res = 0;
 			break;
 		}
