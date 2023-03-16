@@ -214,7 +214,7 @@ source "security/integrity/Kconfig"
 choice
 	prompt "First legacy 'major LSM' to be initialized"
 	default DEFAULT_SECURITY_SELINUX if SECURITY_SELINUX
-	default DEFAULT_SECURITY_LIANGLSM if SECURITY_LiangLSM
+	default DEFAULT_SECURITY_LIANGLSM if SECURITY_LIANGLSM
 	default DEFAULT_SECURITY_SMACK if SECURITY_SMACK
 	default DEFAULT_SECURITY_TOMOYO if SECURITY_TOMOYO
 	default DEFAULT_SECURITY_APPARMOR if SECURITY_APPARMOR
@@ -233,7 +233,7 @@ choice
 		bool "SELinux" if SECURITY_SELINUX=y
 
 	config DEFAULT_SECURITY_LIANGLSM
-		bool "LiangLSM" if SECURITY_LiangLSM=y
+		bool "LiangLSM" if SECURITY_LIANGLSM=y
 
 	config DEFAULT_SECURITY_SMACK
 		bool "Simplified Mandatory Access Control" if SECURITY_SMACK=y

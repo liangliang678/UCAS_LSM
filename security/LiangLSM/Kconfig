@@ -1,4 +1,4 @@
-config         SECURITY_LiangLSM
+config         SECURITY_LIANGLSM
    bool        "LiangLSM support"
    depends on SECURITY
    default     n
