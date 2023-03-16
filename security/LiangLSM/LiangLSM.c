@@ -129,7 +129,7 @@ static struct security_hook_list liang_hooks[] = {
 
 void __init liang_add_hooks(void){
     pr_info("LiangLSM: becoming mindful.\n");
-    security_add_hooks(liang_hooks, ARRAY_SIZE(liang_hooks), "liang");
+    security_add_hooks(liang_hooks, ARRAY_SIZE(liang_hooks), "LiangLSM");
 }
 
 static __init int liang_init(void){
@@ -137,7 +137,7 @@ static __init int liang_init(void){
     return 0;
 }
 
-DEFINE_LSM(liang) = {
-	.name = "liang",
+DEFINE_LSM(LiangLSM) = {
+	.name = "LiangLSM",
 	.init = liang_init,
 };
