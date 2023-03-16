@@ -16,7 +16,7 @@ char* permission_list[] = {
 
 int empty_uid;
 char empty_role[MAX_ROLENAME+1];
-int empty_permission[PERMISSION_COUNT]
+int empty_permission[PERMISSION_COUNT];
 
 int write_user2role(int uid, char *role){
 	FILE *fp = fopen(USER2ROLE_PATH, "wb");
