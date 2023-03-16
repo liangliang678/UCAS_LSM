@@ -4,7 +4,7 @@
 #include <math.h>
 
 #define USER2ROLE_PATH "/etc/LiangLSM/user2role"
-#define ROLE2PERMISSION_PATH "/etc/LiangLSM/role2PERMISSION"
+#define ROLE2PERMISSION_PATH "/etc/LiangLSM/role2permission"
 #define CONTROL_PATH "/etc/LiangLSM/control"
 #define MAX_ROLENAME 20
 
@@ -14,8 +14,12 @@ char* permission_list[] = {
 };
 #define PERMISSION_COUNT (sizeof(permission_list)/sizeof(char*))
 
+int empty_uid;
+char empty_role[MAX_ROLENAME+1];
+int empty_permission[PERMISSION_COUNT]
+
 int write_user2role(int uid, char *role){
-	FILE *fp = fopen(USER2ROLE_PATH, "ab");
+	FILE *fp = fopen(USER2ROLE_PATH, "wb");
 	if(!fp){
 		printf("file open failed\n");
 		return -1;
@@ -50,11 +54,11 @@ int user_exists(int uid){
 int add_user2role(int uid, char *role){
 	int role_len = strlen(role);
 	if(role_len > MAX_ROLENAME){
-		printf("Role name too long\n");
+		printf("Role name is too long\n");
 		return -1;
 	}
-	if(user_exists(uid)){
-		printf("The role of user already exists\n");
+	if(user_exists(uid) == 1){
+		printf("The role of the user already exists\n");
 		return -1;
 	}
 	
@@ -70,7 +74,7 @@ int add_user2role(int uid, char *role){
 }
 
 int del_user2role(int uid){
-	FILE *fp = fopen(USER2ROLE_PATH, "ab");
+	FILE *fp = fopen(USER2ROLE_PATH, "wb");
 	if(!fp){
 		printf("open file failed\n");
 		return -1;
@@ -82,13 +86,13 @@ int del_user2role(int uid){
 	while(fread((char*)&_uid, sizeof(int), 1, fp)){
 		fread(_role, sizeof(char), MAX_ROLENAME+1, fp);
 
-		if(_uid != uid){
+		if(_uid == uid){
 			fseek(fp, -sizeof(int) - sizeof(char) *(MAX_ROLENAME+1), SEEK_CUR);
-			fwrite((char*)&_uid, sizeof(int), 1, fp);
-			fwrite(_role, sizeof(char), MAX_ROLENAME+1, fp);
+			fwrite((char*)&empty_uid, sizeof(int), 1, fp);
+			fwrite(empty_role, sizeof(char), MAX_ROLENAME+1, fp);
 		}
 	}
-	
+
 	fclose(fp);
 	return 1;
 }
@@ -120,7 +124,7 @@ int show_user2role(){
 
 
 int write_role(char *role, int *permission){
-	FILE *fp = fopen(ROLE2PERMISSION_PATH, "ab");	
+	FILE *fp = fopen(ROLE2PERMISSION_PATH, "wb");	
 	if(!fp){
 		printf("file open failed\n");
 		return -1;
@@ -156,7 +160,7 @@ int add_role(char *role, int *permission){
 	int role_len = strlen(role);
 	
 	if(role_len > MAX_ROLENAME){
-		printf("Role name too long\n");
+		printf("Role name is too long\n");
 		return -1;
 	}
 	if(sizeof(permission) != PERMISSION_COUNT * sizeof(int)){
@@ -181,7 +185,7 @@ int add_role(char *role, int *permission){
 }
 
 int del_role(char *role){
-	FILE *fp = fopen(ROLE2PERMISSION_PATH, "ab");
+	FILE *fp = fopen(ROLE2PERMISSION_PATH, "wb");
 	if(!fp){
 		printf("open file failed\n");
 		return -1;
@@ -193,10 +197,10 @@ int del_role(char *role){
 	{
 		fread(_permission, sizeof(int), PERMISSION_COUNT, fp);
 
-		if(strcmp(_role, role)){
+		if(!strcmp(_role, role)){
 			fseek(fp, -sizeof(int) * PERMISSION_COUNT - sizeof(char) *(MAX_ROLENAME+1), SEEK_CUR);
-			fwrite(_role, sizeof(char), MAX_ROLENAME+1, fp);
-			fwrite(_permission, sizeof(int), PERMISSION_COUNT, fp);
+			fwrite(empty_role, sizeof(char), MAX_ROLENAME+1, fp);
+			fwrite(empty_permission, sizeof(int), PERMISSION_COUNT, fp);
 		}
 	}
 
@@ -226,6 +230,7 @@ int show_roles(){
 		for(int i = 0; i < PERMISSION_COUNT; i++){
 			printf(" %s: %s", permission_list[i], permission[1] ? "yes" : "no");
 		}
+		printf("\n");
 	}
 	
 	fclose(fp);
@@ -249,7 +254,7 @@ int set_state(int state){
 	FILE *fp = fopen(CONTROL_PATH, "wb");
 	if(!fp){
 		printf("file open failed\n");
-		return 0;
+		return -1;
 	}
 
 	fwrite((char*)&state, sizeof(int), 1, fp);
