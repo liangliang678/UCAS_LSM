@@ -1,0 +1,6 @@
+config         SECURITY_LiangLSM
+   bool        "LiangLSM support"
+   depends on SECURITY
+   default     n
+   help        
+      Role-Based Access Control System Based on LSM
