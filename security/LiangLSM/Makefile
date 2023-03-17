@@ -1,2 +1,2 @@
-obj-$(CONFIG_SECURITY_LIANGLSM) := LiangLsm.o
-LiangLsm-y := LiangLSM.o
+obj-$(CONFIG_SECURITY_LIANGLSM) := LiangLSM.o
+LiangLSM-y := LiangLSM.o

@@ -21,15 +21,18 @@ char* permission_list[] = {
 };
 #define PERMISSION_COUNT (sizeof(permission_list)/sizeof(char*))
 
+int lianglsm_enabled_boot __initdata = 1;
+
 int get_role(const int uid, char *role){
+	int _uid;
+	int res = 0;
+
 	struct file *fout = filp_open(USER2ROLE_PATH, O_RDONLY, 0);
 	if(!fout || IS_ERR(fout)){
 		printk("LiangLSM: load file error\n");
 		return -1;
 	}
 
-	int _uid;
-	int res = 0;
 	while(kernel_read(fout,(char*)&uid, sizeof(int), &fout->f_pos) > 0){
 		kernel_read(fout, role, sizeof(char) *(MAX_ROLENAME+1), &fout->f_pos);
 		if(uid == _uid){
@@ -46,15 +49,14 @@ int get_role(const int uid, char *role){
 }
 
 int role_permission(const char *role, const int op){
+	char _role[MAX_ROLENAME+1];
+	int _permission[PERMISSION_COUNT];
+	int res = -1;
 	struct file *fout = filp_open(ROLE2PERMISSION_PATH, O_RDONLY, 0);
 	if(!fout || IS_ERR(fout)){
 		printk("LiangLSM: load file error\n");
 		return -1;
 	}
-
-	char _role[MAX_ROLENAME+1];
-	int _permission[PERMISSION_COUNT];
-	int res = -1;
 
 	while(kernel_read(fout, _role, sizeof(char) *(MAX_ROLENAME+1), &fout->f_pos) > 0){
 		if(strcmp(role, _role))
@@ -80,13 +82,13 @@ int role_permission(const char *role, const int op){
 }
 
 int is_enable(void){
+	int state;
 	struct file *fout = filp_open(CONTROL_PATH, O_RDONLY, 0);
 	if(!fout || IS_ERR(fout)){
 		printk("LiangLSM: load file error\n");
 		return -1;
 	}
-
-	int state;
+	
 	kernel_read(fout,(char*)&state, sizeof(int), &fout->f_pos);
 	filp_close(fout, NULL);
 
@@ -127,17 +129,16 @@ static struct security_hook_list liang_hooks[] = {
     LSM_HOOK_INIT(inode_create, liang_inode_create),
 };
 
-void __init liang_add_hooks(void){
+static __init int liang_init(void){
     pr_info("LiangLSM: becoming mindful.\n");
     security_add_hooks(liang_hooks, ARRAY_SIZE(liang_hooks), "LiangLSM");
-}
-
-static __init int liang_init(void){
-    liang_add_hooks();
     return 0;
 }
 
 DEFINE_LSM(LiangLSM) = {
 	.name = "LiangLSM",
+	.flags = LSM_FLAG_LEGACY_MAJOR | LSM_FLAG_EXCLUSIVE,
+	.enabled = &lianglsm_enabled_boot,
 	.init = liang_init,
 };
+
