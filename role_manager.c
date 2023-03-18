@@ -9,8 +9,11 @@
 #define MAX_ROLENAME 20
 
 char* permission_list[] = {
-	"create file",
-	"rename file"
+	"create directory",
+	"delete directory"
+	"open file",
+	"alloc task",
+	"create socket",
 };
 #define PERMISSION_COUNT (sizeof(permission_list)/sizeof(char*))
 
@@ -21,7 +24,7 @@ int empty_permission[PERMISSION_COUNT];
 int write_user2role(int uid, char *role){
 	FILE *fp = fopen(USER2ROLE_PATH, "ab");
 	if(!fp){
-		printf("file open failed\n");
+		printf("file open failed (%s)\n", USER2ROLE_PATH);
 		return -1;
 	}
 	
@@ -35,7 +38,7 @@ int write_user2role(int uid, char *role){
 int user_exists(int uid){
 	FILE *fp = fopen(USER2ROLE_PATH, "rb");
 	if(!fp){
-		printf("file open failed\n");
+		printf("file open failed (%s)\n", USER2ROLE_PATH);
 		return -1;
 	}
 	
@@ -76,7 +79,7 @@ int add_user2role(int uid, char *role){
 int del_user2role(int uid){
 	FILE *fp = fopen(USER2ROLE_PATH, "wb");
 	if(!fp){
-		printf("open file failed\n");
+		printf("open file failed (%s)\n", USER2ROLE_PATH);
 		return -1;
 	}
 
@@ -126,7 +129,7 @@ int show_user2role(){
 int write_role(char *role, int *permission){
 	FILE *fp = fopen(ROLE2PERMISSION_PATH, "ab");	
 	if(!fp){
-		printf("file open failed\n");
+		printf("file open failed (%s)\n", ROLE2PERMISSION_PATH);
 		return -1;
 	}
 	
@@ -187,7 +190,7 @@ int add_role(char *role, int *permission){
 int del_role(char *role){
 	FILE *fp = fopen(ROLE2PERMISSION_PATH, "wb");
 	if(!fp){
-		printf("open file failed\n");
+		printf("open file failed (%s)\n", ROLE2PERMISSION_PATH);
 		return -1;
 	}
 	
@@ -240,7 +243,7 @@ int show_roles(){
 int get_state(){
 	FILE *fp = fopen(CONTROL_PATH, "rb");
 	if(!fp){
-		printf("file open failed\n");
+		printf("file open failed (%s)\n", CONTROL_PATH);
 		return -1;
 	}
 
@@ -254,7 +257,7 @@ int get_state(){
 int set_state(int state){
 	FILE *fp = fopen(CONTROL_PATH, "wb");
 	if(!fp){
-		printf("file open failed\n");
+		printf("file open failed (%s)\n", CONTROL_PATH);
 		return -1;
 	}
 
@@ -336,9 +339,9 @@ int main(int argc, char *argv[]){
 		
 		int uid = atoi(argv[2]);
 		if(add_user2role(uid, argv[3]) == 1)
-			printf("Succeed to add the role the of the user\n");
+			printf("Succeed to add the role of the user\n");
 		else
-			printf("Fail to add the role the of the user\n");
+			printf("Fail to add the role of the user\n");
 		
 		return 0;
 	}
@@ -371,9 +374,9 @@ int main(int argc, char *argv[]){
 		
 		int uid = atoi(argv[2]);
 		if(del_user2role(uid) == 1)
-			printf("Succeed to delete the role the of the user\n");
+			printf("Succeed to delete the role of the user\n");
 		else
-			printf("Fail to delete the role the of the user\n");
+			printf("Fail to delete the role of the user\n");
 		
 		return 0;
 	}
@@ -420,9 +423,9 @@ int main(int argc, char *argv[]){
 		
 		int uid = atoi(argv[2]);
 		if(change_user2role(uid, argv[3]) == 1)
-			printf("Succeed to change the role the of the user\n");
+			printf("Succeed to change the role of the user\n");
 		else
-			printf("Fail to change the role the of the user\n");
+			printf("Fail to change the role of the user\n");
 		
 		return 0;
 	}
@@ -434,9 +437,9 @@ int main(int argc, char *argv[]){
 		
 		int state = get_state();
 		if(state == 1)
-			printf("State: Enable\n");
+			printf("State: Enabled\n");
 		else if(state == 0)
-			printf("State: Disable\n");
+			printf("State: Disabled\n");
 
 		return 0;
 	}
@@ -447,7 +450,7 @@ int main(int argc, char *argv[]){
 		}
 
 		if(set_state(1) == 1)
-			printf("Enable!\n");
+			printf("Enabled\n");
 
 		return 0;
 	}
@@ -458,7 +461,7 @@ int main(int argc, char *argv[]){
 		}
 
 		if(set_state(0) == 1)
-			printf("Disable!\n");
+			printf("Disabled\n");
 
 		return 0;
 	}

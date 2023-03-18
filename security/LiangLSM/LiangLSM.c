@@ -16,8 +16,11 @@
 #define MAX_ROLENAME 20
 
 char* permission_list[] = {
-	"create file",
-	"rename file"
+	"create directory",
+	"delete directory"
+	"open file",
+	"alloc task",
+	"create socket",
 };
 #define PERMISSION_COUNT (sizeof(permission_list)/sizeof(char*))
 
@@ -62,12 +65,12 @@ int role_permission(const char *role, const int op){
 
 		kernel_read(fout,(char*)_permission, sizeof(int) * PERMISSION_COUNT, &fout->f_pos);	
 		if(_permission[op]){
-			printk("LiangLSM: role: %s has permission %s\n", role, permission_list[op]);
+			printk("LiangLSM: role: %s has permission (%s)\n", role, permission_list[op]);
 			res = 1;
 			break;
 		}
 		else{
-			printk("LiangLSM: role: %s has no permission %s\n", role, permission_list[op]);
+			printk("LiangLSM: role: %s has no permission (%s)\n", role, permission_list[op]);
 			res = 0;
 			break;
 		}
@@ -109,24 +112,48 @@ int user_permission(int uid, int op){
 	}
 }
 
-int liang_inode_create(struct inode *dir, struct dentry *dentry, umode_t mode)
+int liang_inode_mkdir(struct inode *dir, struct dentry *dentry, umode_t mode)
 {
 	int uid = current->real_cred->uid.val;
 	if(uid >= 1000)
-		printk("LiangLSM: call inode_create by uid: %d\n", uid);
+		printk("LiangLSM: call inode_mkdir by uid: %d\n", uid);
 	return user_permission(uid, 0);
 }
 
-int liang_inode_rename(struct inode *old_inode, struct dentry *old_dentry, struct inode *new_inode, struct dentry *new_dentry){
+int liang_inode_rmdir(struct inode *dir, struct dentry *dentry){
 	int uid = current->real_cred->uid.val;
 	if(uid >= 1000)
-		printk("LiangLSM: call inode_rename by uid: %d\n", uid);
+		printk("LiangLSM: call inode_rmdir by uid: %d\n", uid);
 	return user_permission(uid, 1);
 }
 
+int liang_file_open(struct file *file){
+	int uid = current->real_cred->uid.val;
+	if(uid >= 1000)
+		printk("LiangLSM: call file_open by uid: %d\n", uid);
+	return user_permission(uid, 2);
+}
+
+int liang_task_alloc(struct task_struct *task, unsigned long clone_flags){
+	int uid = current->real_cred->uid.val;
+	if(uid >= 1000)
+		printk("LiangLSM: call task_alloc by uid: %d\n", uid);
+	return user_permission(uid, 3);
+}
+
+int liang_socket_create(int family, int type, int protocol, int kern){
+	int uid = current->real_cred->uid.val;
+	if(uid >= 1000)
+		printk("LiangLSM: call socket_create by uid: %d\n", uid);
+	return user_permission(uid, 4);
+}
+
 static struct security_hook_list liang_hooks[] = {
-    LSM_HOOK_INIT(inode_rename, liang_inode_rename),
-    LSM_HOOK_INIT(inode_create, liang_inode_create),
+    LSM_HOOK_INIT(inode_mkdir, liang_inode_mkdir),
+    LSM_HOOK_INIT(inode_rmdir, liang_inode_rmdir),
+	LSM_HOOK_INIT(file_open, liang_file_open),
+	LSM_HOOK_INIT(task_alloc, liang_task_alloc),
+	LSM_HOOK_INIT(socket_create, liang_socket_create),
 };
 
 static __init int liang_init(void){
