@@ -203,7 +203,7 @@ int del_role(char *role){
 	}
 	fclose(fp);
 
-	FILE *fp = fopen(ROLE2PERMISSION_PATH, "wb");
+	fp = fopen(ROLE2PERMISSION_PATH, "wb");
 	for(int i =0; i < index; i++){
 		fwrite(_role[i], sizeof(char), MAX_ROLENAME+1, fp);
 		fwrite(_permission[i], sizeof(int), PERMISSION_COUNT, fp);
