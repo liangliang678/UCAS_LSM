@@ -16,10 +16,6 @@ char* permission_list[] = {
 };
 #define PERMISSION_COUNT (sizeof(permission_list)/sizeof(char*))
 
-int empty_uid;
-char empty_role[MAX_ROLENAME+1];
-int empty_permission[PERMISSION_COUNT];
-
 int write_user2role(int uid, char *role){
 	FILE *fp = fopen(USER2ROLE_PATH, "ab");
 	if(!fp){
@@ -81,17 +77,21 @@ int del_user2role(int uid){
 		return -1;
 	}
 
-	int _uid;
-	char _role[MAX_ROLENAME+1];
+	int _uid[100];
+	char _role[100][MAX_ROLENAME+1];
+	int index = 0;
 
-	while(fread((char*)&_uid, sizeof(int), 1, fp)){
-		fread(_role, sizeof(char), MAX_ROLENAME+1, fp);
+	while(fread((char*)&_uid[index], sizeof(int), 1, fp)){
+		fread(_role[index], sizeof(char), MAX_ROLENAME+1, fp);
 
-		if(_uid == uid){
-			fseek(fp, -sizeof(int) - sizeof(char) *(MAX_ROLENAME+1), SEEK_CUR);
-			fwrite((char*)&empty_uid, sizeof(int), 1, fp);
-			fwrite(empty_role, sizeof(char), MAX_ROLENAME+1, fp);
+		if(_uid != uid){
+			index++;
 		}
+	}
+
+	for(int i = 0; i < index; i++){
+		fwrite((char*)&_uid[i], sizeof(int), 1, fp);
+		fwrite(_role[i], sizeof(char), MAX_ROLENAME+1, fp);
 	}
 
 	fclose(fp);
@@ -187,17 +187,22 @@ int del_role(char *role){
 		return -1;
 	}
 	
-	char _role[MAX_ROLENAME+1];
-	int _permission[PERMISSION_COUNT];
-	while(fread(_role, sizeof(char), MAX_ROLENAME+1, fp))
-	{
-		fread(_permission, sizeof(int), PERMISSION_COUNT, fp);
+	char _role[100][MAX_ROLENAME+1];
+	int _permission[100][PERMISSION_COUNT];
+	int index= 0;
 
-		if(!strcmp(_role, role)){
-			fseek(fp, -sizeof(int) * PERMISSION_COUNT - sizeof(char) *(MAX_ROLENAME+1), SEEK_CUR);
-			fwrite(empty_role, sizeof(char), MAX_ROLENAME+1, fp);
-			fwrite(empty_permission, sizeof(int), PERMISSION_COUNT, fp);
+	while(fread(_role[index], sizeof(char), MAX_ROLENAME+1, fp))
+	{
+		fread(_permission[index], sizeof(int), PERMISSION_COUNT, fp);
+
+		if(strcmp(_role, role)){
+			index++;		
 		}
+	}
+
+	for(int i =0; i < index; i++){
+		fwrite(_role[i], sizeof(char), MAX_ROLENAME+1, fp);
+		fwrite(_permission[i], sizeof(int), PERMISSION_COUNT, fp);
 	}
 
 	fclose(fp);

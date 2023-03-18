@@ -141,8 +141,8 @@ int liang_socket_create(int family, int type, int protocol, int kern){
 }
 
 static struct security_hook_list liang_hooks[] = {
-    	LSM_HOOK_INIT(inode_mkdir, liang_inode_mkdir),
-    	LSM_HOOK_INIT(inode_rmdir, liang_inode_rmdir),
+    LSM_HOOK_INIT(inode_mkdir, liang_inode_mkdir),
+    LSM_HOOK_INIT(inode_rmdir, liang_inode_rmdir),
 	LSM_HOOK_INIT(task_alloc, liang_task_alloc),
 	LSM_HOOK_INIT(socket_create, liang_socket_create),
 };
