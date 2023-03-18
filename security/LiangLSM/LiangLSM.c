@@ -18,7 +18,6 @@
 char* permission_list[] = {
 	"create directory",
 	"delete directory",
-	"open file",
 	"alloc task",
 	"create socket",
 };
@@ -60,10 +59,10 @@ int role_permission(const char *role, const int op){
 	}
 
 	while(kernel_read(fout, _role, sizeof(char) *(MAX_ROLENAME+1), &fout->f_pos) > 0){
+		kernel_read(fout,(char*)_permission, sizeof(int) * PERMISSION_COUNT, &fout->f_pos);
 		if(strcmp(role, _role))
 			continue;
 
-		kernel_read(fout,(char*)_permission, sizeof(int) * PERMISSION_COUNT, &fout->f_pos);	
 		if(_permission[op]){
 			printk("LiangLSM: role: %s has permission (%s)\n", role, permission_list[op]);
 			res = 1;
@@ -77,7 +76,7 @@ int role_permission(const char *role, const int op){
 	}
 
 	if(res == -1)
-		printk("LiangLSM: role: %s not exist", role);
+		printk("LiangLSM: role: %s not exists", role);
 	filp_close(fout, NULL);
 	return res;
 }
@@ -127,31 +126,23 @@ int liang_inode_rmdir(struct inode *dir, struct dentry *dentry){
 	return user_permission(uid, 1);
 }
 
-int liang_file_open(struct file *file){
-	int uid = current->real_cred->uid.val;
-	if(uid >= 1000)
-		printk("LiangLSM: call file_open by uid: %d\n", uid);
-	return user_permission(uid, 2);
-}
-
 int liang_task_alloc(struct task_struct *task, unsigned long clone_flags){
 	int uid = current->real_cred->uid.val;
 	if(uid >= 1000)
 		printk("LiangLSM: call task_alloc by uid: %d\n", uid);
-	return user_permission(uid, 3);
+	return user_permission(uid, 2);
 }
 
 int liang_socket_create(int family, int type, int protocol, int kern){
 	int uid = current->real_cred->uid.val;
 	if(uid >= 1000)
 		printk("LiangLSM: call socket_create by uid: %d\n", uid);
-	return user_permission(uid, 4);
+	return user_permission(uid, 3);
 }
 
 static struct security_hook_list liang_hooks[] = {
-    LSM_HOOK_INIT(inode_mkdir, liang_inode_mkdir),
-    LSM_HOOK_INIT(inode_rmdir, liang_inode_rmdir),
-	LSM_HOOK_INIT(file_open, liang_file_open),
+    	LSM_HOOK_INIT(inode_mkdir, liang_inode_mkdir),
+    	LSM_HOOK_INIT(inode_rmdir, liang_inode_rmdir),
 	LSM_HOOK_INIT(task_alloc, liang_task_alloc),
 	LSM_HOOK_INIT(socket_create, liang_socket_create),
 };
