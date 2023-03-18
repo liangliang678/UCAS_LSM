@@ -10,7 +10,7 @@
 
 char* permission_list[] = {
 	"create directory",
-	"delete directory"
+	"delete directory",
 	"open file",
 	"alloc task",
 	"create socket",
@@ -38,8 +38,7 @@ int write_user2role(int uid, char *role){
 int user_exists(int uid){
 	FILE *fp = fopen(USER2ROLE_PATH, "rb");
 	if(!fp){
-		printf("file open failed (%s)\n", USER2ROLE_PATH);
-		return -1;
+		return 0;
 	}
 	
 	int _uid;
@@ -142,8 +141,7 @@ int write_role(char *role, int *permission){
 int role_exists(char *role){
 	FILE *fp = fopen(ROLE2PERMISSION_PATH, "rb");
 	if(!fp){
-		printf("file open failed\n");
-		return -1;
+		return 0;
 	}
 	
 	char _role[MAX_ROLENAME+1];
@@ -164,10 +162,6 @@ int add_role(char *role, int *permission){
 	
 	if(role_len > MAX_ROLENAME){
 		printf("Role name is too long\n");
-		return -1;
-	}
-	if(sizeof(permission) != PERMISSION_COUNT * sizeof(int)){
-		printf("invalid permission setting\n");
 		return -1;
 	}
 	if(role_exists(role) == 1){
@@ -228,10 +222,10 @@ int show_roles(){
 	int permission[PERMISSION_COUNT];
 	char role[MAX_ROLENAME+1];
 	while(fread(role, sizeof(char), MAX_ROLENAME+1, fp)){
-		printf("%s permission:", role);
+		printf("%s permission:\n", role);
 		fread(permission, sizeof(int), PERMISSION_COUNT, fp);
 		for(int i = 0; i < PERMISSION_COUNT; i++){
-			printf(" %s: %s", permission_list[i], permission[1] ? "yes" : "no");
+			printf("%s: %s\n", permission_list[i], permission[i] ? "yes" : "no");
 		}
 		printf("\n");
 	}

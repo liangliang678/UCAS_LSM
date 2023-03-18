@@ -17,7 +17,7 @@
 
 char* permission_list[] = {
 	"create directory",
-	"delete directory"
+	"delete directory",
 	"open file",
 	"alloc task",
 	"create socket",
