@@ -84,7 +84,7 @@ int del_user2role(int uid){
 	while(fread((char*)&_uid[index], sizeof(int), 1, fp)){
 		fread(_role[index], sizeof(char), MAX_ROLENAME+1, fp);
 
-		if(_uid != uid){
+		if(_uid[index] != uid){
 			index++;
 		}
 	}
@@ -195,7 +195,7 @@ int del_role(char *role){
 	{
 		fread(_permission[index], sizeof(int), PERMISSION_COUNT, fp);
 
-		if(strcmp(_role, role)){
+		if(strcmp(_role[index], role)){
 			index++;		
 		}
 	}
