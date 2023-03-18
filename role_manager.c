@@ -71,7 +71,7 @@ int add_user2role(int uid, char *role){
 }
 
 int del_user2role(int uid){
-	FILE *fp = fopen(USER2ROLE_PATH, "wb");
+	FILE *fp = fopen(USER2ROLE_PATH, "rb");
 	if(!fp){
 		printf("open file failed (%s)\n", USER2ROLE_PATH);
 		return -1;
@@ -88,7 +88,9 @@ int del_user2role(int uid){
 			index++;
 		}
 	}
+	fclose(fp);
 
+	fp = fopen(USER2ROLE_PATH, "wb");
 	for(int i = 0; i < index; i++){
 		fwrite((char*)&_uid[i], sizeof(int), 1, fp);
 		fwrite(_role[i], sizeof(char), MAX_ROLENAME+1, fp);
@@ -181,7 +183,7 @@ int add_role(char *role, int *permission){
 }
 
 int del_role(char *role){
-	FILE *fp = fopen(ROLE2PERMISSION_PATH, "wb");
+	FILE *fp = fopen(ROLE2PERMISSION_PATH, "rb");
 	if(!fp){
 		printf("open file failed (%s)\n", ROLE2PERMISSION_PATH);
 		return -1;
@@ -199,7 +201,9 @@ int del_role(char *role){
 			index++;		
 		}
 	}
+	fclose(fp);
 
+	FILE *fp = fopen(ROLE2PERMISSION_PATH, "wb");
 	for(int i =0; i < index; i++){
 		fwrite(_role[i], sizeof(char), MAX_ROLENAME+1, fp);
 		fwrite(_permission[i], sizeof(int), PERMISSION_COUNT, fp);
