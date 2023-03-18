@@ -11,7 +11,7 @@
 #include <linux/uaccess.h>
 
 #define USER2ROLE_PATH "/etc/LiangLSM/user2role"
-#define ROLE2PERMISSION_PATH "/etc/LiangLSM/role2PERMISSION"
+#define ROLE2PERMISSION_PATH "/etc/LiangLSM/role2permission"
 #define CONTROL_PATH "/etc/LiangLSM/control"
 #define MAX_ROLENAME 20
 
@@ -27,7 +27,7 @@ int get_role(const int uid, char *role){
 
 	struct file *fout = filp_open(USER2ROLE_PATH, O_RDONLY, 0);
 	if(!fout || IS_ERR(fout)){
-		printk("LiangLSM: load file error\n");
+		printk("LiangLSM: load file error (%s)\n", USER2ROLE_PATH);
 		return -1;
 	}
 
@@ -52,7 +52,7 @@ int role_permission(const char *role, const int op){
 	int res = -1;
 	struct file *fout = filp_open(ROLE2PERMISSION_PATH, O_RDONLY, 0);
 	if(!fout || IS_ERR(fout)){
-		printk("LiangLSM: load file error\n");
+		printk("LiangLSM: load file error (%s)\n", ROLE2PERMISSION_PATH);
 		return -1;
 	}
 
@@ -83,7 +83,7 @@ int is_enable(void){
 	int state;
 	struct file *fout = filp_open(CONTROL_PATH, O_RDONLY, 0);
 	if(!fout || IS_ERR(fout)){
-		printk("LiangLSM: load file error\n");
+		printk("LiangLSM: load file error (%s)\n", CONTROL_PATH);
 		return -1;
 	}
 	
@@ -112,13 +112,15 @@ int user_permission(int uid, int op){
 int liang_inode_create(struct inode *dir, struct dentry *dentry, umode_t mode)
 {
 	int uid = current->real_cred->uid.val;
-	printk("LiangLSM: call inode_create by uid: %d\n", uid);
+	if(uid >= 1000)
+		printk("LiangLSM: call inode_create by uid: %d\n", uid);
 	return user_permission(uid, 0);
 }
 
 int liang_inode_rename(struct inode *old_inode, struct dentry *old_dentry, struct inode *new_inode, struct dentry *new_dentry){
 	int uid = current->real_cred->uid.val;
-	printk("LiangLSM: call inode_rename by uid: %d\n", uid);
+	if(uid >= 1000)
+		printk("LiangLSM: call inode_rename by uid: %d\n", uid);
 	return user_permission(uid, 1);
 }
 
