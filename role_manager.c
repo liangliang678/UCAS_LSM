@@ -246,6 +246,7 @@ int get_state(){
 
 	int state;
 	fread((char*)&state, sizeof(int), 1, fp);
+	fclose(fp);
 	
 	return state;
 }
@@ -258,6 +259,7 @@ int set_state(int state){
 	}
 
 	fwrite((char*)&state, sizeof(int), 1, fp);
+	fclose(fp);
 
 	return 1;
 }

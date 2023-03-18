@@ -21,8 +21,6 @@ char* permission_list[] = {
 };
 #define PERMISSION_COUNT (sizeof(permission_list)/sizeof(char*))
 
-int lianglsm_enabled_boot __initdata = 1;
-
 int get_role(const int uid, char *role){
 	int _uid;
 	int res = 0;
@@ -33,7 +31,7 @@ int get_role(const int uid, char *role){
 		return -1;
 	}
 
-	while(kernel_read(fout,(char*)&uid, sizeof(int), &fout->f_pos) > 0){
+	while(kernel_read(fout,(char*)&_uid, sizeof(int), &fout->f_pos) > 0){
 		kernel_read(fout, role, sizeof(char) *(MAX_ROLENAME+1), &fout->f_pos);
 		if(uid == _uid){
 			printk("LiangLSM: uid: %d, role: %s\n", uid, role);
@@ -97,9 +95,9 @@ int is_enable(void){
 
 int user_permission(int uid, int op){
 	char role[MAX_ROLENAME+1];
-	if(!is_enable())
-		return 0;
 	if(uid <= 999)
+		return 0;
+	if(is_enable() != 1)
 		return 0;
 	if(get_role(uid, role) != 1)
 		return 0;
@@ -130,15 +128,13 @@ static struct security_hook_list liang_hooks[] = {
 };
 
 static __init int liang_init(void){
-    pr_info("LiangLSM: becoming mindful.\n");
+    pr_info("LiangLSM: initializing.\n");
     security_add_hooks(liang_hooks, ARRAY_SIZE(liang_hooks), "LiangLSM");
     return 0;
 }
 
 DEFINE_LSM(LiangLSM) = {
-	.name = "LiangLSM",
-	.flags = LSM_FLAG_LEGACY_MAJOR | LSM_FLAG_EXCLUSIVE,
-	.enabled = &lianglsm_enabled_boot,
+	.name = "LiangLSM",	
 	.init = liang_init,
 };
 
